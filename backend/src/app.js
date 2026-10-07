@@ -74,6 +74,41 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// ── Seed (one-time, protected by secret key) ──────────────────────────────────
+app.post('/internal/seed', async (req, res) => {
+  if (req.headers['x-seed-key'] !== process.env.SEED_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const bcrypt = require('bcryptjs');
+    await prisma.user.deleteMany({ where: { email: 'demo@example.com' } });
+    const passwordHash = await bcrypt.hash('Demo@1234', 12);
+    const user = await prisma.user.create({
+      data: {
+        fullName: 'Demo User', email: 'demo@example.com', passwordHash,
+        projects: {
+          create: [
+            { name: 'Website Redesign', description: 'Modernise the company landing page', status: 'IN_PROGRESS',
+              tasks: { create: [
+                { name: 'Wireframe homepage', status: 'COMPLETED', priority: 'HIGH' },
+                { name: 'Design system tokens', status: 'IN_PROGRESS', priority: 'HIGH' },
+                { name: 'Implement header component', status: 'PENDING', priority: 'MEDIUM' },
+              ]}},
+            { name: 'Mobile App MVP', description: 'React Native app for iOS and Android', status: 'NOT_STARTED',
+              tasks: { create: [
+                { name: 'Set up Expo project', status: 'COMPLETED', priority: 'HIGH' },
+                { name: 'Auth screens', status: 'IN_PROGRESS', priority: 'HIGH' },
+              ]}},
+          ],
+        },
+      },
+    });
+    res.json({ ok: true, email: user.email });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
