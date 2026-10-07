@@ -2,7 +2,7 @@
 
 A full-stack project and task management app with a shared REST API powering both a **Next.js web app** and a **React Native (Expo) mobile app**.
 
-**Live Demo:** `https://your-app.vercel.app` · **API:** `https://your-api.onrender.com`
+**Live Demo:** `https://task-flow-gamma-ochre.vercel.app/` · **Demo login:** ` demo@example.com / Demo@1234`
 
 ---
 
